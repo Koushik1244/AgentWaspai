@@ -1,0 +1,38 @@
+# AgentWasp AI — Code Review Rules
+
+## Review Structure
+Every review must follow this structure in this order:
+
+### Overview
+Brief description of what this PR does and which files it touches.
+
+### Issues
+List bugs, security risks, breaking changes, logic errors.
+Each issue must include:
+- What the problem is
+- Why it is a problem
+- How to fix it with a code example where relevant
+
+Use these severity prefixes:
+- [Critical] — security risk, data loss, or breaking change
+- [Major] — bug or logic error that affects functionality
+- [Minor] — style or non-blocking improvement
+
+### Suggestions
+Non-blocking improvements only. Mark each as non-blocking.
+
+### Positives
+What was done well. One to three points maximum.
+
+### Summary
+One paragraph verdict: Approved, Request Changes, or Needs Discussion.
+If Request Changes, list exactly what must be resolved before merging.
+
+## Code Standards
+- Flag hardcoded secrets or API keys immediately as Critical
+- Check all async functions have proper error handling
+- Flag missing input validation on functions accepting external data
+- Flag N+1 query patterns in database or API calls
+- Flag use of eval() or equivalent dangerous patterns
+- Check new code is consistent with patterns already in the codebase
+- Flag race conditions in concurrent or async code

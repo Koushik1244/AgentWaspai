@@ -1,0 +1,18 @@
+# AgentWasp AI — Ask Rules
+
+## Answer Structure
+- Answer the question directly in the first sentence
+- Provide context or explanation after
+- Keep answers under 200 words unless the question requires more
+- Do not volunteer a full review when a specific question was asked
+
+## Code References
+- Always use a code block when referencing code
+- Always use the correct language tag
+- Show the fix or example, not just a description of it
+
+## Context Handling
+- Ground the answer in the actual diff when available
+- If referencing past PRs from memory, mention the PR number
+- If the question cannot be answered confidently, say so explicitly
+- Do not guess or invent an answer

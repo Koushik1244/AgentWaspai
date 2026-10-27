@@ -1,0 +1,115 @@
+# k8s/cognee-deployment.yaml
+# Runs ONLY the Cognee memory service.
+# Your FastAPI app lives in k8s/api-deployment.yaml
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agentwaspai
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cognee-data
+  namespace: agentwaspai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cognee
+  namespace: agentwaspai
+  labels:
+    app: cognee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cognee
+  template:
+    metadata:
+      labels:
+        app: cognee
+    spec:
+      containers:
+        - name: cognee
+          image: cognee/cognee:0.5.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agentwaspai-secrets
+                  key: LLM_API_KEY
+            - name: LLM_MODEL
+              valueFrom:
+                secretKeyRef:
+                  name: agentwaspai-secrets
+                  key: LLM_MODEL
+            - name: EMBEDDING_MODEL
+              valueFrom:
+                secretKeyRef:
+                  name: agentwaspai-secrets
+                  key: EMBEDDING_MODEL
+            - name: EMBEDDING_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agentwaspai-secrets
+                  key: EMBEDDING_API_KEY
+            - name: SYSTEM_ROOT_DIRECTORY
+              value: /data/cognee_system
+            - name: DATA_ROOT_DIRECTORY
+              value: /data/cognee_data
+            - name: TELEMETRY_DISABLED
+              value: "true"
+          volumeMounts:
+            - name: cognee-storage
+              mountPath: /data
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 2Gi
+              cpu: 1000m
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+      volumes:
+        - name: cognee-storage
+          persistentVolumeClaim:
+            claimName: cognee-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cognee
+  namespace: agentwaspai
+spec:
+  selector:
+    app: cognee
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
